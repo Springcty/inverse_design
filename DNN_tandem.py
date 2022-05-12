@@ -6,8 +6,8 @@ import numpy as np
 
 class tandem_network(object):
 	def __init__(self, 
-		INN_size,
-		FNN_size,
+		INN_size, #[6, 512, 256, 9]
+		FNN_size, #[9, 1024,512,512,256,256,128, 6]
 		starter_learning_rate = 0.001,#0.0001
 		decay_step = 1000*100,#3000000
 		decay_rate = 0.5,
@@ -38,7 +38,9 @@ class tandem_network(object):
 		self.sess.run(tf.global_variables_initializer())
 
 	def build_net(self):
+		# self.inn_size[0] = 6, R
 		self.response = tf.placeholder(tf.float32, [None, self.inn_size[0]],  name='response')  # input
+		# self.inn_size[-1] = 9, D
 		self.design   = tf.placeholder(tf.float32, [None, self.inn_size[-1]], name='design')  # label
 		self.pred_fnn = self.build_dense(self.design, 'FNN', self.fnn_size, self.range_response)
 		self.layer_m  = self.build_dense(self.response, 'INN', self.inn_size, self.range_design)
@@ -64,7 +66,7 @@ class tandem_network(object):
 	def build_dense(self, input_layer, name, size, output_range=[0,1]):
 		w_initializer = tf.random_uniform_initializer(-0.005, 0.005)#FNN
 		w_initializer = tf.random_uniform_initializer(-0.01, 0.01)#INN
-		regularizer = tf.contrib.layers.l2_regularizer(0.01, scope=None)
+		regularizer = tf.contrib.layers.l2_regularizer(0.01, scope=None)	 # 正则化？？？	
 		
 		with tf.variable_scope(name):
 			output = input_layer
